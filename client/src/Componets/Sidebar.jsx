@@ -1,70 +1,33 @@
 import * as React from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
-import PeopleIcon from '@mui/icons-material/People';
-import CategoryIcon from '@mui/icons-material/Category';
-import { Link, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Avatar from '@mui/material/Avatar';
+import ConfirmModal from './ConfirmModal';
 
-const drawerWidth = 260;
+const Main = styled('main')(({ theme }) => ({
+  flexGrow: 1,
+  padding: 0,
+  background: 'linear-gradient(180deg, #2a1147 0%, #150824 100%)',
+  color: '#e2d5f8',
+  minHeight: '100vh',
+  display: 'flex',
+  flexDirection: 'column'
+}));
 
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: 0,
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginLeft: `-${drawerWidth}px`,
-    ...(open && {
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    }),
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column'
-  }),
-);
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-  transition: theme.transitions.create(['margin', 'width'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+const AppBar = styled(MuiAppBar)(({ theme }) => ({
+  backgroundColor: 'rgba(42, 17, 71, 0.5)',
   backdropFilter: 'blur(10px)',
   color: '#aa3bff',
   boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-  ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
+  width: '100%',
 }));
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -77,103 +40,91 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function Sidebar({ children }) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
-  const location = useLocation();
+  const navigate = useNavigate();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
-  const menuItems = [
-    { text: 'DASHBOARD', icon: <DashboardCustomizeIcon />, path: '/dashboard' },
-    { text: 'VIEW USER', icon: <PeopleIcon />, path: '/Admin/ViewUser' },
-    { text: 'MANAGE CATEGORY', icon: <CategoryIcon />, path: '/Admin/ViewCategory' },
-  ];
+  const handleLogoutClick = () => {
+    setAnchorEl(null);
+    setIsLogoutModalOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+    setIsLogoutModalOpen(false);
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed">
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 800, color: '#aa3bff', letterSpacing: '1px' }}>
-            ADMIN PANEL
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            {/* ADMIN PANEL removed as requested */}
           </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <Avatar sx={{ bgcolor: '#ff3b8f' }}>A</Avatar>
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              sx={{
+                '& .MuiPaper-root': {
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.1)',
+                  mt: 1,
+                  minWidth: '150px'
+                }
+              }}
+            >
+              <MenuItem onClick={handleLogoutClick} sx={{ fontWeight: 600, color: '#aa3bff' }}>Logout</MenuItem>
+            </Menu>
+          </Box>
         </Toolbar>
       </AppBar>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            background: 'linear-gradient(180deg, #2a1147 0%, #150824 100%)',
-            color: '#e2d5f8',
-            borderRight: 'none',
-          },
-        }}
-        variant="persistent"
-        anchor="left"
-        open={open}
-      >
-        <DrawerHeader>
-          <Typography variant="h5" sx={{ color: '#ff3b8f', fontWeight: '900', mr: 'auto', ml: 2, letterSpacing: '1px' }}>
-            ECOMM
-          </Typography>
-          <IconButton onClick={handleDrawerClose} sx={{ color: '#aa3bff' }}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
-        <List sx={{ px: 2, py: 2 }}>
-          {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
-              <ListItemButton
-                component={Link}
-                to={item.path}
-                selected={location.pathname === item.path}
-                sx={{
-                  borderRadius: 2,
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(45deg, #aa3bff, #ff3b8f)',
-                    color: '#fff',
-                    '& .MuiListItemIcon-root': { color: '#fff' },
-                    '&:hover': { opacity: 0.9 },
-                  },
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.08)',
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ color: location.pathname === item.path ? '#fff' : '#a78bfa', minWidth: 40 }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={item.text} 
-                  primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600 }}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-      <Main open={open}>
+      <Main>
         <DrawerHeader />
         {children}
       </Main>
+
+      <ConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogoutConfirm}
+        title="Logout Confirmation"
+        message="Are you sure you want to log out of your account?"
+      />
     </Box>
   );
 }

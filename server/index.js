@@ -17,7 +17,7 @@ dbconnection();
 // Routes
 app.use('/user', require("./Routes/user_routes"));
 app.use("/recipes", require("./Routes/recipe_routes"));
-
+app.use("/category", require("./Routes/category_routes"));
 // Test API
 axios.post('http://localhost:7000/recipes/add')
   .then(response => {

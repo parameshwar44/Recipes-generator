@@ -49,66 +49,42 @@ exports.generateRecipe = async (req, res) => {
         error: "Title and category are required",
       });
     }
-
-    // AI generation is currently commented out, returning 501 for now.
-    return res.status(501).json({ error: "AI generation is currently disabled." });
-
-    // const prompt = `
-    // You are a professional chef.
-    // 
-    // Generate a recipe.
-    // 
-    // Dish: ${title}
-    // Category: ${category}
-    // 
-    // Return ONLY valid JSON:
-    // {
-    //   "ingredients": ["ingredient1", "ingredient2"],
-    //   "steps": ["step1", "step2"]
-    // }
-    // `;
-
-    // if (!openai) {
-    //   return res.status(501).json({ error: "OpenAI API key not configured on server" });
-    // }
-
-    // const response = await openai.chat.completions.create({
-    //   model: "gpt-4o-mini",
-    //   messages: [{ role: "user", content: prompt }],
-    // });
-
-    // let text = response.choices[0].message.content;
-
-    // 🔥 Clean response (important)
-    // text = text.replace(/```json|```/g, "").trim();
-
-    // let data;
-    // try {
-    //   data = JSON.parse(text);
-    // } catch (err) {
-    //   return res.status(500).json({
-    //     error: "Invalid JSON from AI",
-    //     raw: text,
-    //   });
-    // }
-
-    // ✅ Save generated recipe to DB
-    // const newRecipe = new Recipe({
-    //   title,
-    //   category,
-    //   ingredients: data.ingredients,
-    //   steps: data.steps,
-    // });
-
-    // const savedRecipe = await newRecipe.save();
-
-    // res.json({
-    //   message: "Recipe generated successfully",
-    //   recipe: savedRecipe,
-    // });
-
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
+
+// ✅ UPDATE RECIPE
+exports.updateRecipe = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedRecipe = await Recipe.findByIdAndUpdate(id, req.body, { new: true });
+    
+    if (!updatedRecipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    res.json({
+      message: "Recipe updated successfully",
+      recipe: updatedRecipe,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ✅ DELETE RECIPE
+exports.deleteRecipe = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedRecipe = await Recipe.findByIdAndDelete(id);
+
+    if (!deletedRecipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    res.json({ message: "Recipe deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
